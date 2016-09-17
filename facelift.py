@@ -8,10 +8,22 @@ import cv2
 
 
 def iter_images_in(folder_path):
-    files = os.listdir(folder_path)
-    image_paths = [f for f in files if f.endswith('.png') or f.endswith('.jpg')]
-    images = (load_image(folder_path + path) for path in image_paths)
-    return (image for image in images if image is not None)
+    """
+    Return an iterator to all images in the folder (.png and .jpg).
+    :param folder_path: Folder where to load the images from.
+    :return: Generator/Iterator of loaded images.
+    """
+    try:
+        files = os.listdir(folder_path)
+        image_paths = [f for f in files
+                       if f.endswith('.png') or f.endswith('.jpg')]
+        images = (load_image(folder_path + path) for path in image_paths)
+        return (image for image in images if image is not None)
+    except OSError as e:
+        if e.errno == 2:
+            return None
+        else:
+            raise
 
 
 def load_image(image_path):
@@ -40,6 +52,14 @@ def get_faces_in(image):
 
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     return face_cascade.detectMultiScale(gray, 1.3, 5)
+
+
+def find_best_centre_for(all_rects):
+    return None
+
+
+def get_centre_for(rectangle):
+    return None
 
 
 if __name__ == '__main__':
