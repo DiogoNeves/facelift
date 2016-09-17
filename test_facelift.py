@@ -3,7 +3,7 @@
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
-    calculate_centre_of
+    calc_centre_of, calc_centre_of_all
 
 TEST_FOLDER = 'test_resources/'
 TEST_IMAGE_PATH = TEST_FOLDER + 'test_face.jpg'
@@ -44,16 +44,42 @@ def test_loading_invalid_folder_returns_none():
     assert iter_images_in('invalid folder') is None
 
 
-def test_get_centre_of_rectangle():
-    assert calculate_centre_of((0, 0, 2, 2)) == (1., 1.)
-    assert calculate_centre_of((0, 0, 3, 3)) == (1.5, 1.5)
-    assert calculate_centre_of((3, 3, 2, 2)) == (4., 4.)
-    assert calculate_centre_of((3, 3, 3, 2)) == (4.5, 4.)
-    assert calculate_centre_of((-3, 3, 2, 2)) == (-2, 4)
+def test_calc_centre_of_rectangle():
+    assert calc_centre_of((0, 0, 2, 2)) == (1., 1.)
+    assert calc_centre_of((0, 0, 3, 3)) == (1.5, 1.5)
+    assert calc_centre_of((3, 3, 2, 2)) == (4., 4.)
+    assert calc_centre_of((3, 3, 3, 2)) == (4.5, 4.)
+    assert calc_centre_of((-3, 3, 2, 2)) == (-2, 4)
 
 
-def test_get_centre_of_invalid_rectangle_returns_none():
+def test_calc_centre_of_invalid_rectangle_returns_asserts():
     with pytest.raises(AssertionError):
-        assert calculate_centre_of((3, 3, 2, -2)) is None
+        assert calc_centre_of((3, 3, 2, -2)) is None
     with pytest.raises(AssertionError):
-        assert calculate_centre_of((3, 3, -2, 2)) is None
+        assert calc_centre_of((3, 3, -2, 2)) is None
+
+
+def test_calc_centre_of_all_single_rectangle_returns_its_centre():
+    rectangle = (1, 1, 2, 2)
+    assert calc_centre_of_all([rectangle]) == calc_centre_of(rectangle)
+
+
+def test_calc_centre_of_all_two_rectangles_returns_middle():
+    rectangle1 = (0, 0, 2, 2)
+    rectangle2 = (2, 2, 2, 2)
+    assert calc_centre_of_all([rectangle1, rectangle2]) == (2., 2.)
+
+
+def test_calc_centre_of_all_four_rectangles_returns_right_point():
+    rectangles = [
+        (0, 0, 2, 2),
+        (2, 2, 2, 2),
+        (1, 1, 2, 2),
+        (3, 3, 3, 2)
+    ]
+    # TODO: This is wrong!!! CALCULATE THE RIGHT ONE!!!
+    assert calc_centre_of_all(rectangles) == (1., 1.)
+
+
+def test_calc_centre_of_all_empty_returns_none():
+    assert calc_centre_of_all([]) is None

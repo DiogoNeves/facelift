@@ -54,11 +54,18 @@ def get_faces_in(image):
     return face_cascade.detectMultiScale(gray, 1.3, 5)
 
 
-def find_best_centre_for(all_rects):
-    return None
+def calc_centre_of_all(rectangles):
+    if not rectangles:
+        return None
+
+    centres = map(calc_centre_of, rectangles)
+    if len(centres) == 1:
+        return centres[0]
+    else:
+        return None
 
 
-def calculate_centre_of(rectangle):
+def calc_centre_of(rectangle):
     x, y, w, h = rectangle
     assert w >= 0 and h >= 0
     return x + (w / 2.0), y + (h / 2.0)
