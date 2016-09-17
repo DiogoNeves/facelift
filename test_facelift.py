@@ -1,7 +1,9 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
+import pytest
 
-from facelift import load_image, get_faces_in, iter_images_in
+from facelift import load_image, get_faces_in, iter_images_in, \
+    calculate_centre_of
 
 TEST_FOLDER = 'test_resources/'
 TEST_IMAGE_PATH = TEST_FOLDER + 'test_face.jpg'
@@ -43,8 +45,15 @@ def test_loading_invalid_folder_returns_none():
 
 
 def test_get_centre_of_rectangle():
-    pass
+    assert calculate_centre_of((0, 0, 2, 2)) == (1., 1.)
+    assert calculate_centre_of((0, 0, 3, 3)) == (1.5, 1.5)
+    assert calculate_centre_of((3, 3, 2, 2)) == (4., 4.)
+    assert calculate_centre_of((3, 3, 3, 2)) == (4.5, 4.)
+    assert calculate_centre_of((-3, 3, 2, 2)) == (-2, 4)
 
 
 def test_get_centre_of_invalid_rectangle_returns_none():
-    pass
+    with pytest.raises(AssertionError):
+        assert calculate_centre_of((3, 3, 2, -2)) is None
+    with pytest.raises(AssertionError):
+        assert calculate_centre_of((3, 3, -2, 2)) is None

@@ -58,8 +58,10 @@ def find_best_centre_for(all_rects):
     return None
 
 
-def get_centre_for(rectangle):
-    return None
+def calculate_centre_of(rectangle):
+    x, y, w, h = rectangle
+    assert w >= 0 and h >= 0
+    return x + (w / 2.0), y + (h / 2.0)
 
 
 if __name__ == '__main__':
