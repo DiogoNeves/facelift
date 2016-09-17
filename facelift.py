@@ -2,7 +2,16 @@
 # -*- coding: utf-8 -*-
 
 # noinspection PyUnresolvedReferences,PyPackageRequirements
+import os
+
 import cv2
+
+
+def iter_images_in(folder_path):
+    files = os.listdir(folder_path)
+    image_paths = [f for f in files if f.endswith('.png') or f.endswith('.jpg')]
+    images = (load_image(folder_path + path) for path in image_paths)
+    return (image for image in images if image is not None)
 
 
 def load_image(image_path):
