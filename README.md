@@ -28,3 +28,42 @@ Create a tool that given a list of photos of the same person, aligns their faces
 ## Future
 
 Depending on how much fun I have with this, I will add support for selecting (automatically or manually) the right face in photos of multiple people.
+
+## Run the Tool
+
+Keep in mind this is very experimental, I didn't spend much time thinking about distribution.
+
+### Installation
+
+The hardest part will be installing opencv (you need to get to a point where this works):
+
+```Python
+import cv2
+print dir(cv2)
+```
+
+I use (Brew)[http://brew.sh/] but still had to hack a couple of things.
+
+After you get that working, create a new virtual environment and run:
+
+```bash
+> pip install -r requirements.txt
+```
+
+You should be ready to go.
+
+### Tests
+
+In the right environment:
+
+```bash
+pytest test_facelift.py 
+```
+
+### Running
+
+Add your photos to the `photos/` folder in the same directory as the tool.
+
+```bash
+python facelift.py
+```
