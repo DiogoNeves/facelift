@@ -18,6 +18,13 @@ Create a tool that given a list of photos of the same person, aligns their faces
 6. Sort them by date
 7. Create a GIF
 
+## Goals
+
+* Learn a little more about Face Detection (using libraries)
+* Practice Python outside what I currently do
+* Have fun
+* Create a timelapse of my daughter's face
+
 ## Future
 
 Depending on how much fun I have with this, I will add support for selecting (automatically or manually) the right face in photos of multiple people.
