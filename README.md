@@ -57,7 +57,7 @@ You should be ready to go.
 In the right environment:
 
 ```bash
-pytest test_facelift.py 
+> pytest test_facelift.py 
 ```
 
 ### Running
@@ -65,5 +65,5 @@ pytest test_facelift.py
 Add your photos to the `photos/` folder in the same directory as the tool.
 
 ```bash
-python facelift.py
+> python facelift.py
 ```
