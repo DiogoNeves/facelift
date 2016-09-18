@@ -55,23 +55,34 @@ def get_faces_in(image):
     return face_cascade.detectMultiScale(gray, 1.3, 5)
 
 
-def calc_centre_of_all(rectangles):
-    if not rectangles:
+def calc_final_position_for_all(faces):
+    """
+    Calculate the point where all faces should be moved to.
+    This is the centroid of all face rectangles to minimise movement.
+    :param faces: Face rectangles to calculate the centroid from.
+    :return: Centroid point or None if no rectangles.
+    """
+    if not faces:
         return None
 
-    centres = map(calc_centre_of, rectangles)
+    centres = map(calc_centre_of, faces)
     return numpy.mean(centres, axis=0)
 
 
-def calc_centre_of(rectangle):
-    x, y, w, h = rectangle
+def calc_centre_of(face):
+    x, y, w, h = face
     assert w >= 0 and h >= 0
     return numpy.array([x + (w / 2.), y + (h / 2.)])
 
 
+def calc_best_face_width_for_all(faces):
+    assert all([f > 0 for f in faces[:, 2]])
+    return numpy.average(faces[:, 2])
+
+
 if __name__ == '__main__':
     def main():
-        img = load_image('test_resources/test_no_face.jpg')
+        img = load_image('test_resources/test_face.jpg')
         fcs = get_faces_in(img)
         for (x, y, w, h) in fcs:
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)

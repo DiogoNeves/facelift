@@ -4,7 +4,7 @@ import numpy
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
-    calc_centre_of, calc_centre_of_all
+    calc_centre_of, calc_final_position_for_all, calc_best_face_width_for_all
 
 TEST_FOLDER = 'test_resources/'
 TEST_FACE_PATH = TEST_FOLDER + 'test_face.jpg'
@@ -56,7 +56,7 @@ def test_loading_invalid_folder_returns_none():
     assert iter_images_in('invalid folder') is None
 
 
-def test_calc_centre_of_rectangle():
+def test_calc_centre_of_face():
     assert (calc_centre_of((0, 0, 2, 2)) == numpy.array([1, 1])).all()
     assert (calc_centre_of((0, 0, 3, 3)) == numpy.array([1.5, 1.5])).all()
     assert (calc_centre_of((3, 3, 2, 2)) == numpy.array([4., 4.])).all()
@@ -64,35 +64,61 @@ def test_calc_centre_of_rectangle():
     assert (calc_centre_of((-3, 3, 2, 2)) == numpy.array([-2, 4])).all()
 
 
-def test_calc_centre_of_invalid_rectangle_returns_asserts():
+def test_calc_centre_of_invalid_face_returns_asserts():
     with pytest.raises(AssertionError):
         assert calc_centre_of((3, 3, 2, -2)) is None
     with pytest.raises(AssertionError):
         assert calc_centre_of((3, 3, -2, 2)) is None
+    with pytest.raises(AssertionError):
+        assert calc_centre_of((3, 3, 2, 0)) is None
+    with pytest.raises(AssertionError):
+        assert calc_centre_of((3, 3, 0, 2)) is None
 
 
-def test_calc_centre_of_all_single_rectangle_returns_its_centre():
-    rectangle = (1, 1, 2, 2)
-    assert (calc_centre_of_all([rectangle]) == calc_centre_of(rectangle)).all()
+def test_calc_final_position_for_all_single_face_returns_its_centre():
+    face = (1, 1, 2, 2)
+    assert (calc_final_position_for_all([face]) == calc_centre_of(face)).all()
 
 
-def test_calc_centre_of_all_two_rectangles_returns_middle():
-    rectangle1 = (0, 0, 2, 2)
-    rectangle2 = (2, 2, 2, 2)
+def test_calc_final_position_for_all_two_faces_returns_middle():
+    face1 = (0, 0, 2, 2)
+    face2 = (2, 2, 2, 2)
     centre = numpy.array([2., 2.])
-    assert (calc_centre_of_all([rectangle1, rectangle2]) == centre).all()
+    assert (calc_final_position_for_all([face1, face2]) == centre).all()
 
 
-def test_calc_centre_of_all_four_rectangles_returns_right_point():
-    rectangles = [
+def test_calc_final_position_for_all_four_faces_returns_right_point():
+    faces = [
         (0, 0, 2, 2),
         (2, 2, 2, 2),
         (2, 0, 2, 2),
         (0, 2, 2, 2)
     ]
     centre = numpy.array([2., 2.])
-    assert (calc_centre_of_all(rectangles) == centre).all()
+    assert (calc_final_position_for_all(faces) == centre).all()
 
 
-def test_calc_centre_of_all_empty_returns_none():
-    assert calc_centre_of_all([]) is None
+def test_calc_final_position_for_all_empty_returns_none():
+    assert calc_final_position_for_all([]) is None
+
+
+def test_calc_best_face_width_for_all_single_face_returns_its_width():
+    faces = numpy.array([(1, 3, 4, 5)])
+    assert calc_best_face_width_for_all(faces) == 4.
+
+
+def test_calc_best_face_width_for_all_two_faces_returns_average_width():
+    faces = numpy.array([
+        (1, 2, 3, 4),
+        (0, 0, 6, 6)
+    ])
+    assert calc_best_face_width_for_all(faces) == 4.5
+
+
+def test_calc_best_face_width_for_all_invalid_faces_asserts():
+    faces = numpy.array([
+        (0, 0, 2, 2),  # valid
+        (0, 0, 0, 2)   # invalid
+    ])
+    with pytest.raises(AssertionError):
+        calc_best_face_width_for_all(faces)
