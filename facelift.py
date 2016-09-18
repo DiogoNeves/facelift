@@ -15,6 +15,8 @@ def iter_images_in(folder_path):
     :return: Generator/Iterator of loaded images.
     """
     try:
+        if folder_path[-1] != '/':
+            folder_path += '/'
         files = os.listdir(folder_path)
         image_paths = [f for f in files
                        if f.endswith('.png') or f.endswith('.jpg')]
@@ -25,6 +27,8 @@ def iter_images_in(folder_path):
             return None
         else:
             raise
+    except IndexError:
+        return None
 
 
 def load_image(image_path):
@@ -82,12 +86,15 @@ def calc_best_face_width_for_all(faces):
 
 if __name__ == '__main__':
     def main():
-        img = load_image('test_resources/test_face.jpg')
-        fcs = get_faces_in(img)
-        for (x, y, w, h) in fcs:
-            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
+        images = iter_images_in('test_resources/test_photos/')
+        final = []
+        for i, img in enumerate(images):
+            fcs = get_faces_in(img)
+            for (x, y, w, h) in fcs:
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
+            cv2.imshow('img%d' % i, img)
 
-        cv2.imshow('img', img)
+        # cv2.imshow('final', final)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

@@ -52,8 +52,23 @@ def test_loading_folder_returns_all_images():
                 for img, path in zip(image_folder, real_images)])
 
 
+def test_loading_folder_appends_slash_to_path():
+    real_images = [
+        'test_photo1.jpg',
+        'test_photo2.jpg',
+        'test_photo3.png',
+    ]
+    path = TEST_FOLDER + 'test_photos'
+    image_folder = list(iter_images_in(path))
+    assert len(image_folder) == len(real_images)
+
+
 def test_loading_invalid_folder_returns_none():
     assert iter_images_in('invalid folder') is None
+
+
+def test_loading_folder_with_empty_path_returns_none():
+    assert iter_images_in('') is None
 
 
 def test_calc_centre_of_face():
