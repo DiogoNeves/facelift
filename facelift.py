@@ -5,6 +5,7 @@
 import os
 
 import cv2
+import numpy
 
 
 def iter_images_in(folder_path):
@@ -59,24 +60,24 @@ def calc_centre_of_all(rectangles):
         return None
 
     centres = map(calc_centre_of, rectangles)
-    if len(centres) == 1:
-        return centres[0]
-    else:
-        return None
+    return numpy.mean(centres, axis=0)
 
 
 def calc_centre_of(rectangle):
     x, y, w, h = rectangle
     assert w >= 0 and h >= 0
-    return x + (w / 2.0), y + (h / 2.0)
+    return numpy.array([x + (w / 2.), y + (h / 2.)])
 
 
 if __name__ == '__main__':
-    img = load_image('test_resources/test_face.jpg')
-    fcs = get_faces_in(img)
-    for (x, y, w, h) in fcs:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
+    def main():
+        img = load_image('test_resources/test_face.jpg')
+        fcs = get_faces_in(img)
+        for (x, y, w, h) in fcs:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
 
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    main()

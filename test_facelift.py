@@ -1,5 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
+import numpy
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
@@ -45,11 +46,11 @@ def test_loading_invalid_folder_returns_none():
 
 
 def test_calc_centre_of_rectangle():
-    assert calc_centre_of((0, 0, 2, 2)) == (1., 1.)
-    assert calc_centre_of((0, 0, 3, 3)) == (1.5, 1.5)
-    assert calc_centre_of((3, 3, 2, 2)) == (4., 4.)
-    assert calc_centre_of((3, 3, 3, 2)) == (4.5, 4.)
-    assert calc_centre_of((-3, 3, 2, 2)) == (-2, 4)
+    assert (calc_centre_of((0, 0, 2, 2)) == numpy.array([1, 1])).all()
+    assert (calc_centre_of((0, 0, 3, 3)) == numpy.array([1.5, 1.5])).all()
+    assert (calc_centre_of((3, 3, 2, 2)) == numpy.array([4., 4.])).all()
+    assert (calc_centre_of((3, 3, 3, 2)) == numpy.array([4.5, 4.])).all()
+    assert (calc_centre_of((-3, 3, 2, 2)) == numpy.array([-2, 4])).all()
 
 
 def test_calc_centre_of_invalid_rectangle_returns_asserts():
@@ -61,24 +62,25 @@ def test_calc_centre_of_invalid_rectangle_returns_asserts():
 
 def test_calc_centre_of_all_single_rectangle_returns_its_centre():
     rectangle = (1, 1, 2, 2)
-    assert calc_centre_of_all([rectangle]) == calc_centre_of(rectangle)
+    assert (calc_centre_of_all([rectangle]) == calc_centre_of(rectangle)).all()
 
 
 def test_calc_centre_of_all_two_rectangles_returns_middle():
     rectangle1 = (0, 0, 2, 2)
     rectangle2 = (2, 2, 2, 2)
-    assert calc_centre_of_all([rectangle1, rectangle2]) == (2., 2.)
+    centre = numpy.array([2., 2.])
+    assert (calc_centre_of_all([rectangle1, rectangle2]) == centre).all()
 
 
 def test_calc_centre_of_all_four_rectangles_returns_right_point():
     rectangles = [
         (0, 0, 2, 2),
         (2, 2, 2, 2),
-        (1, 1, 2, 2),
-        (3, 3, 3, 2)
+        (2, 0, 2, 2),
+        (0, 2, 2, 2)
     ]
-    # TODO: This is wrong!!! CALCULATE THE RIGHT ONE!!!
-    assert calc_centre_of_all(rectangles) == (1., 1.)
+    centre = numpy.array([2., 2.])
+    assert (calc_centre_of_all(rectangles) == centre).all()
 
 
 def test_calc_centre_of_all_empty_returns_none():
