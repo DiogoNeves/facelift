@@ -71,7 +71,7 @@ def calc_centre_of(rectangle):
 
 if __name__ == '__main__':
     def main():
-        img = load_image('test_resources/test_face.jpg')
+        img = load_image('test_resources/test_no_face.jpg')
         fcs = get_faces_in(img)
         for (x, y, w, h) in fcs:
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)

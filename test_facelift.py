@@ -7,12 +7,13 @@ from facelift import load_image, get_faces_in, iter_images_in, \
     calc_centre_of, calc_centre_of_all
 
 TEST_FOLDER = 'test_resources/'
-TEST_IMAGE_PATH = TEST_FOLDER + 'test_face.jpg'
+TEST_FACE_PATH = TEST_FOLDER + 'test_face.jpg'
+TEST_NO_FACE_PATH = TEST_FOLDER + 'test_no_face.jpg'
 TEST_PHOTO_FOLDER = TEST_FOLDER + 'test_photos/'
 
 
 def test_it_loads_image():
-    image = load_image(TEST_IMAGE_PATH)
+    image = load_image(TEST_FACE_PATH)
     assert image is not None
     assert image.shape == (904, 904, 3)
 
@@ -23,9 +24,15 @@ def test_load_image_with_invalid_path_returns_none():
 
 
 def test_it_detects_a_face():
-    image = load_image(TEST_IMAGE_PATH)
+    image = load_image(TEST_FACE_PATH)
     faces = get_faces_in(image)
     assert len(faces) == 1
+
+
+def test_it_doesnt_detect_face_where_it_doesnt_exist():
+    image = load_image(TEST_NO_FACE_PATH)
+    faces = get_faces_in(image)
+    assert len(faces) == 0
 
 
 def test_loading_folder_returns_iterator():
@@ -34,7 +41,11 @@ def test_loading_folder_returns_iterator():
 
 
 def test_loading_folder_returns_all_images():
-    real_images = ['test_photo1.jpg']
+    real_images = [
+        'test_photo1.jpg',
+        'test_photo2.jpg',
+        'test_photo3.png',
+    ]
     image_folder = list(iter_images_in(TEST_PHOTO_FOLDER))
     assert len(image_folder) == len(real_images)
     assert all([(img == load_image(TEST_PHOTO_FOLDER + path)).all()
