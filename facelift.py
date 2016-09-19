@@ -53,10 +53,14 @@ def get_faces_in(image):
     if face_cascade.empty():
         if __name__ == '__main__':
             print 'Failed to load Classifier "%s"' % classifier_name
-        return tuple()
+        return numpy.empty((0, 4))
 
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    return face_cascade.detectMultiScale(gray, 1.3, 5)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    if isinstance(faces, tuple):
+        return numpy.empty((0, 4))
+    else:
+        return faces
 
 
 def calc_final_position_for_all(faces):
@@ -66,7 +70,7 @@ def calc_final_position_for_all(faces):
     :param faces: Face rectangles to calculate the centroid from.
     :return: Centroid point or None if no rectangles.
     """
-    if not faces:
+    if faces.size == 0:
         return None
 
     centres = map(calc_centre_of, faces)
@@ -84,17 +88,31 @@ def calc_best_face_width_for_all(faces):
     return numpy.average(faces[:, 2])
 
 
+# noinspection PyTypeChecker
+def calc_rectangle_for(centroid, width, height):
+    assert isinstance(centroid, numpy.ndarray)
+    size = numpy.array([width, height])
+    return numpy.append((centroid - (size / 2)), size)
+
+
 if __name__ == '__main__':
     def main():
-        images = iter_images_in('test_resources/test_photos/')
-        final = []
+        images = list(iter_images_in('test_resources/test_photos/'))
+        faces = numpy.empty((0, 4))
         for i, img in enumerate(images):
             fcs = get_faces_in(img)
+            faces = numpy.concatenate([faces, fcs], axis=0)
             for (x, y, w, h) in fcs:
                 cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
             cv2.imshow('img%d' % i, img)
 
-        # cv2.imshow('final', final)
+        final = numpy.zeros(images[0].shape, images[0].dtype)
+        centroid = calc_final_position_for_all(faces)
+        width = calc_best_face_width_for_all(faces)
+        x, y, w, h = calc_rectangle_for(centroid, width, 20).astype(int)
+        cv2.rectangle(final, (x, y), (x + w, y + h), (255, 0, 0), 5)
+
+        cv2.imshow('final', final)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 

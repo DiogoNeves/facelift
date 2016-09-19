@@ -4,7 +4,8 @@ import numpy
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
-    calc_centre_of, calc_final_position_for_all, calc_best_face_width_for_all
+    calc_centre_of, calc_final_position_for_all, calc_best_face_width_for_all, \
+    calc_rectangle_for
 
 TEST_FOLDER = 'test_resources/'
 TEST_FACE_PATH = TEST_FOLDER + 'test_face.jpg'
@@ -33,6 +34,8 @@ def test_it_doesnt_detect_face_where_it_doesnt_exist():
     image = load_image(TEST_NO_FACE_PATH)
     faces = get_faces_in(image)
     assert len(faces) == 0
+    assert isinstance(faces, numpy.ndarray)
+    assert faces.shape == (0, 4)
 
 
 def test_loading_folder_returns_iterator():
@@ -91,30 +94,33 @@ def test_calc_centre_of_invalid_face_returns_asserts():
 
 
 def test_calc_final_position_for_all_single_face_returns_its_centre():
-    face = (1, 1, 2, 2)
-    assert (calc_final_position_for_all([face]) == calc_centre_of(face)).all()
+    face = numpy.array((1, 1, 2, 2))
+    faces = numpy.array([face])
+    assert (calc_final_position_for_all(faces) == calc_centre_of(face)).all()
 
 
 def test_calc_final_position_for_all_two_faces_returns_middle():
-    face1 = (0, 0, 2, 2)
-    face2 = (2, 2, 2, 2)
+    faces = numpy.array([
+        (0, 0, 2, 2),
+        (2, 2, 2, 2)
+    ])
     centre = numpy.array([2., 2.])
-    assert (calc_final_position_for_all([face1, face2]) == centre).all()
+    assert (calc_final_position_for_all(faces) == centre).all()
 
 
 def test_calc_final_position_for_all_four_faces_returns_right_point():
-    faces = [
+    faces = numpy.array([
         (0, 0, 2, 2),
         (2, 2, 2, 2),
         (2, 0, 2, 2),
         (0, 2, 2, 2)
-    ]
+    ])
     centre = numpy.array([2., 2.])
     assert (calc_final_position_for_all(faces) == centre).all()
 
 
 def test_calc_final_position_for_all_empty_returns_none():
-    assert calc_final_position_for_all([]) is None
+    assert calc_final_position_for_all(numpy.empty((0, 4))) is None
 
 
 def test_calc_best_face_width_for_all_single_face_returns_its_width():
@@ -137,3 +143,14 @@ def test_calc_best_face_width_for_all_invalid_faces_asserts():
     ])
     with pytest.raises(AssertionError):
         calc_best_face_width_for_all(faces)
+
+
+def test_calc_rectangle_for():
+    centroid = numpy.array([1., 1.])
+    rectangle = numpy.array([0, 0, 2, 2])
+    assert (calc_rectangle_for(centroid, 2., 2.) == rectangle).all()
+
+
+def test_calc_rectangle_for_asserts_invalid_type():
+    with pytest.raises(AssertionError):
+        calc_rectangle_for(1, 2, 2)
