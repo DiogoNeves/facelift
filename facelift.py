@@ -113,22 +113,48 @@ def calc_rectangle_for(centroid, width, height):
     return numpy.append((centroid - (size / 2)), size)
 
 
+def draw_image_with_face(image, face, buffer, final_face_rect):
+    """
+    Draw an image into the buffer after applying the needed
+    transformations so that its face fills the final face rect.
+    This changes buffer's contents.
+    :param image: Image to draw.
+    :param face: Valid face rectangle of that image.
+    :param buffer: Buffer where to draw the image into.
+    :param final_face_rect: Face rectangle we want to fill.
+    """
+    # Just a test
+    # TODO: Calculate final position and draw
+    s = 100
+    buffer[:s, :s] = image[:s, :s]
+
+
 if __name__ == '__main__':
     def main():
         images = list(iter_images_in('test_resources/test_photos/'))
-        faces = numpy.empty((0, 4))
-        for i, img in enumerate(images):
-            fcs = get_faces_in(img)
-            faces = numpy.concatenate([faces, fcs], axis=0)
-            for (x, y, w, h) in fcs:
-                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            cv2.imshow('img%d' % i, img)
+
+        images_with_faces = []
+        image_faces = []
+        for img in images:
+            faces = get_faces_in(img)
+            if len(faces) > 0:
+                images_with_faces.append(img)
+                image_faces.append(faces[0])
 
         final = numpy.zeros(images[0].shape, images[0].dtype)
+        faces = numpy.array(image_faces)
         centroid = calc_final_position_for_all(faces)
         width = calc_best_face_width_for_all(faces)
-        x, y, w, h = calc_rectangle_for(centroid, width, 20).astype(int)
+        x, y, w, h = final_face_rect = calc_rectangle_for(centroid,
+                                                          width, 20).astype(int)
         cv2.rectangle(final, (x, y), (x + w, y + h), (255, 0, 0), 5)
+
+        for i in xrange(len(images_with_faces)):
+            image = images_with_faces[i]
+            x, y, w, h = face = image_faces[i]
+            draw_image_with_face(image, face, final, final_face_rect)
+            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 5)
+            cv2.imshow('img%d' % i, image)
 
         cv2.imshow('final', final)
         cv2.waitKey(0)
