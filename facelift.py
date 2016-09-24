@@ -78,18 +78,36 @@ def calc_final_position_for_all(faces):
 
 
 def calc_centre_of(face):
+    """
+    Calculate the central point of the face.
+    :param face: Face to calculate.
+    :return: ndarray with the x, y coordinates of the point.
+    """
     x, y, w, h = face
     assert w >= 0 and h >= 0
     return numpy.array([x + (w / 2.), y + (h / 2.)])
 
 
 def calc_best_face_width_for_all(faces):
+    """
+    Calculate the best width for the final face size.
+    :param faces: All faces we want to resize.
+    :return: The final width.
+    """
     assert all([f > 0 for f in faces[:, 2]])
     return numpy.average(faces[:, 2])
 
 
 # noinspection PyTypeChecker
 def calc_rectangle_for(centroid, width, height):
+    """
+    Calculate a full rectangle with centre at centroid and
+    width and height.
+    :param centroid: Central point of the rectangle.
+    :param width: Width of the rectangle.
+    :param height: Height of the rectangle.
+    :return: ndarray with the (x, y, w, h) of the rectangle.
+    """
     assert isinstance(centroid, numpy.ndarray)
     size = numpy.array([width, height])
     return numpy.append((centroid - (size / 2)), size)
