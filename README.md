@@ -1,8 +1,10 @@
 # facelift
 A simple Python tool to create animations from photos of a person, face aligned, in the order they were taken.
 
-This is very simple and experimental, the goal is to learn something.  
-It requires all photos to have the same person, alone.
+This is a very simple and experimental tool. The goal is to learn something within a week or so.  
+If you like the idea and want it, or parts of it, developed further, just send me a message.  
+
+It requires all photos to have the same person, alone. For more information see README.md in the photos folder.
 
 ## Brief
 
