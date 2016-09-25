@@ -66,26 +66,14 @@ def get_faces_in(image):
 def calc_best_face_width_for_all(faces):
     """
     Calculate the best width for the final face size.
+    This is not normalised by face size because we'll want to use the
+    extra image size to fill empty spaces after transforming images to
+    fit the final face rect.
     :param faces: All faces we want to resize.
     :return: The final width.
     """
     assert all([f > 0 for f in faces[:, 2]])
     return numpy.average(faces[:, 2])
-
-
-# noinspection PyTypeChecker
-def calc_rectangle_for(centre, width, height):
-    """
-    Calculate a full rectangle with centre at centre and
-    width and height.
-    :param centre: Central point of the rectangle.
-    :param width: Width of the rectangle.
-    :param height: Height of the rectangle.
-    :return: ndarray with the (x, y, w, h) of the rectangle.
-    """
-    assert isinstance(centre, numpy.ndarray)
-    size = numpy.array([width, height])
-    return numpy.append((centre - (size / 2)), size)
 
 
 def draw_image_with_face(image, face, buffer, target_face_width):
@@ -101,7 +89,7 @@ def draw_image_with_face(image, face, buffer, target_face_width):
     """
     # Just a test
     # TODO: Calculate final position and draw
-    s = 100
+    s = 640
     buffer[:s, :s] = image[:s, :s]
 
 
@@ -110,31 +98,24 @@ if __name__ == '__main__':
         images = list(iter_images_in('test_resources/test_photos/'))
 
         images_with_faces = []
-        image_faces = []
+        all_faces = []
         for img in images:
             faces = get_faces_in(img)
             if len(faces) > 0:
                 images_with_faces.append(img)
-                image_faces.append(faces[0])
+                all_faces.append(faces[0])
 
-        final = numpy.zeros(images[0].shape, images[0].dtype)
-        faces = numpy.array(image_faces)
-        width = calc_best_face_width_for_all(faces)
-
-        # Testing, probably remove after
-        centre = numpy.array(final.shape) / 2
-        final_face_rect = calc_rectangle_for(centre, width, 20).astype(int)
-        x, y, w, h = final_face_rect
-        cv2.rectangle(final, (x, y), (x + w, y + h), (255, 0, 0), 5)
+        target_width = 640
+        final = numpy.zeros((target_width, target_width, 3), images[0].dtype)
+        width = calc_best_face_width_for_all(numpy.array(all_faces))
 
         for i in xrange(len(images_with_faces)):
             image = images_with_faces[i]
-            x, y, w, h = face = image_faces[i]
+            x, y, w, h = face = all_faces[i]
             draw_image_with_face(image, face, final, width)
             cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            cv2.imshow('img%d' % i, image)
+            cv2.imshow('img%d' % i, final)
 
-        cv2.imshow('final', final)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
