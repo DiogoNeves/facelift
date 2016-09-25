@@ -63,31 +63,6 @@ def get_faces_in(image):
         return faces
 
 
-def calc_final_position_for_all(faces):
-    """
-    Calculate the point where all faces should be moved to.
-    This is the centroid of all face rectangles to minimise movement.
-    :param faces: Face rectangles to calculate the centroid from.
-    :return: Centroid point or None if no rectangles.
-    """
-    if faces.size == 0:
-        return None
-
-    centres = map(calc_centre_of, faces)
-    return numpy.mean(centres, axis=0)
-
-
-def calc_centre_of(face):
-    """
-    Calculate the central point of the face.
-    :param face: Face to calculate.
-    :return: ndarray with the x, y coordinates of the point.
-    """
-    x, y, w, h = face
-    assert w >= 0 and h >= 0
-    return numpy.array([x + (w / 2.), y + (h / 2.)])
-
-
 def calc_best_face_width_for_all(faces):
     """
     Calculate the best width for the final face size.
@@ -99,21 +74,21 @@ def calc_best_face_width_for_all(faces):
 
 
 # noinspection PyTypeChecker
-def calc_rectangle_for(centroid, width, height):
+def calc_rectangle_for(centre, width, height):
     """
-    Calculate a full rectangle with centre at centroid and
+    Calculate a full rectangle with centre at centre and
     width and height.
-    :param centroid: Central point of the rectangle.
+    :param centre: Central point of the rectangle.
     :param width: Width of the rectangle.
     :param height: Height of the rectangle.
     :return: ndarray with the (x, y, w, h) of the rectangle.
     """
-    assert isinstance(centroid, numpy.ndarray)
+    assert isinstance(centre, numpy.ndarray)
     size = numpy.array([width, height])
-    return numpy.append((centroid - (size / 2)), size)
+    return numpy.append((centre - (size / 2)), size)
 
 
-def draw_image_with_face(image, face, buffer, final_face_rect):
+def draw_image_with_face(image, face, buffer, target_face_width):
     """
     Draw an image into the buffer after applying the needed
     transformations so that its face fills the final face rect.
@@ -121,7 +96,8 @@ def draw_image_with_face(image, face, buffer, final_face_rect):
     :param image: Image to draw.
     :param face: Valid face rectangle of that image.
     :param buffer: Buffer where to draw the image into.
-    :param final_face_rect: Face rectangle we want to fill.
+    :param target_face_width: The face width ```face``` should have
+        after drawing to buffer.
     """
     # Just a test
     # TODO: Calculate final position and draw
@@ -143,16 +119,18 @@ if __name__ == '__main__':
 
         final = numpy.zeros(images[0].shape, images[0].dtype)
         faces = numpy.array(image_faces)
-        centroid = calc_final_position_for_all(faces)
         width = calc_best_face_width_for_all(faces)
-        x, y, w, h = final_face_rect = calc_rectangle_for(centroid,
-                                                          width, 20).astype(int)
+
+        # Testing, probably remove after
+        centre = numpy.array(final.shape) / 2
+        final_face_rect = calc_rectangle_for(centre, width, 20).astype(int)
+        x, y, w, h = final_face_rect
         cv2.rectangle(final, (x, y), (x + w, y + h), (255, 0, 0), 5)
 
         for i in xrange(len(images_with_faces)):
             image = images_with_faces[i]
             x, y, w, h = face = image_faces[i]
-            draw_image_with_face(image, face, final, final_face_rect)
+            draw_image_with_face(image, face, final, width)
             cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 5)
             cv2.imshow('img%d' % i, image)
 

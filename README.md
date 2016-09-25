@@ -13,12 +13,10 @@ Create a tool that given a list of photos of the same person, aligns their faces
 ### Strategy
 
 1. Detect face in all photos and keep the Face Rect information for all photos
-2. Find the central point where to centre all faces minimising total amount of moving
-3. Find average face size so to minimise total resizing
-4. Find the intersection of all image rectangles after applying previous transformations 
-5. Cut all photos
-6. Sort them by date
-7. Create a GIF
+2. Find average face size so to minimise total resizing 
+3. Cut all photos by the minimum between a pre-defined square or intersection of all images
+4. Sort them by date
+5. Create a GIF
 
 ## Goals
 

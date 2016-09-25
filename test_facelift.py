@@ -4,7 +4,7 @@ import numpy
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
-    calc_centre_of, calc_final_position_for_all, calc_best_face_width_for_all, \
+    calc_best_face_width_for_all, \
     calc_rectangle_for
 
 TEST_FOLDER = 'test_resources/'
@@ -72,55 +72,6 @@ def test_loading_invalid_folder_returns_none():
 
 def test_loading_folder_with_empty_path_returns_none():
     assert iter_images_in('') is None
-
-
-def test_calc_centre_of_face():
-    assert (calc_centre_of((0, 0, 2, 2)) == numpy.array([1, 1])).all()
-    assert (calc_centre_of((0, 0, 3, 3)) == numpy.array([1.5, 1.5])).all()
-    assert (calc_centre_of((3, 3, 2, 2)) == numpy.array([4., 4.])).all()
-    assert (calc_centre_of((3, 3, 3, 2)) == numpy.array([4.5, 4.])).all()
-    assert (calc_centre_of((-3, 3, 2, 2)) == numpy.array([-2, 4])).all()
-
-
-def test_calc_centre_of_invalid_face_returns_asserts():
-    with pytest.raises(AssertionError):
-        assert calc_centre_of((3, 3, 2, -2)) is None
-    with pytest.raises(AssertionError):
-        assert calc_centre_of((3, 3, -2, 2)) is None
-    with pytest.raises(AssertionError):
-        assert calc_centre_of((3, 3, 2, 0)) is None
-    with pytest.raises(AssertionError):
-        assert calc_centre_of((3, 3, 0, 2)) is None
-
-
-def test_calc_final_position_for_all_single_face_returns_its_centre():
-    face = numpy.array((1, 1, 2, 2))
-    faces = numpy.array([face])
-    assert (calc_final_position_for_all(faces) == calc_centre_of(face)).all()
-
-
-def test_calc_final_position_for_all_two_faces_returns_middle():
-    faces = numpy.array([
-        (0, 0, 2, 2),
-        (2, 2, 2, 2)
-    ])
-    centre = numpy.array([2., 2.])
-    assert (calc_final_position_for_all(faces) == centre).all()
-
-
-def test_calc_final_position_for_all_four_faces_returns_right_point():
-    faces = numpy.array([
-        (0, 0, 2, 2),
-        (2, 2, 2, 2),
-        (2, 0, 2, 2),
-        (0, 2, 2, 2)
-    ])
-    centre = numpy.array([2., 2.])
-    assert (calc_final_position_for_all(faces) == centre).all()
-
-
-def test_calc_final_position_for_all_empty_returns_none():
-    assert calc_final_position_for_all(numpy.empty((0, 4))) is None
 
 
 def test_calc_best_face_width_for_all_single_face_returns_its_width():
