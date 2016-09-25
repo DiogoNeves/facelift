@@ -4,7 +4,7 @@ import numpy
 import pytest
 
 from facelift import load_image, get_faces_in, iter_images_in, \
-    calc_best_face_width_for_all
+    calc_best_face_width_for_all, calc_rectangle_for
 
 TEST_FOLDER = 'test_resources/'
 TEST_FACE_PATH = TEST_FOLDER + 'test_face.jpg'
@@ -93,3 +93,14 @@ def test_calc_best_face_width_for_all_invalid_faces_asserts():
     ])
     with pytest.raises(AssertionError):
         calc_best_face_width_for_all(faces)
+
+
+def test_calc_rectangle_for():
+    centroid = numpy.array([1., 1.])
+    rectangle = numpy.array([0, 0, 2, 2])
+    assert (calc_rectangle_for(centroid, 2., 2.) == rectangle).all()
+
+
+def test_calc_rectangle_for_asserts_invalid_type():
+    with pytest.raises(AssertionError):
+        calc_rectangle_for(1, 2, 2)

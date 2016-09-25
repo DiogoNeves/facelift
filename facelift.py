@@ -8,6 +8,9 @@ import cv2
 import numpy
 
 
+_TARGET_WIDTH = 640
+
+
 def iter_images_in(folder_path):
     """
     Return an iterator to all images in the folder (.png and .jpg).
@@ -76,21 +79,46 @@ def calc_best_face_width_for_all(faces):
     return numpy.average(faces[:, 2])
 
 
-def draw_image_with_face(image, face, buffer, target_face_width):
+def draw_image_with_face(image, face, frame, target_face_width):
     """
     Draw an image into the buffer after applying the needed
     transformations so that its face fills the final face rect.
     This changes buffer's contents.
     :param image: Image to draw.
     :param face: Valid face rectangle of that image.
-    :param buffer: Buffer where to draw the image into.
-    :param target_face_width: The face width ```face``` should have
+    :param frame: Frame Buffer where to draw the image into.
+    :param target_face_width: The face width `face` should have
         after drawing to buffer.
     """
-    # Just a test
-    # TODO: Calculate final position and draw
-    s = 640
-    buffer[:s, :s] = image[:s, :s]
+    _, _, face_width, _ = face
+    size_ratio = target_face_width / float(face_width)
+
+    image = cv2.resize(image, None, fx=size_ratio, fy=size_ratio,
+                       interpolation=cv2.INTER_CUBIC)
+
+    x, y, _, h = numpy.array(face) * size_ratio
+    centre = numpy.array(frame.shape[:2]) / 2
+    final_x, final_y, _, _ = calc_rectangle_for(centre, target_face_width, h)
+    x, y = final_x - x, final_y - y
+
+    translation = numpy.float32([[1, 0, x], [0, 1, y]])
+    image = cv2.warpAffine(image, translation, frame.shape[:2])
+
+    frame[:, :] = image[:, :]
+
+
+def calc_rectangle_for(centre, width, height):
+    """
+    Calculate a full rectangle with centre at centre and
+    width and height.
+    :param centre: Central point of the rectangle.
+    :param width: Width of the rectangle.
+    :param height: Height of the rectangle.
+    :return: ndarray with the (x, y, w, h) of the rectangle.
+    """
+    assert isinstance(centre, numpy.ndarray)
+    size = numpy.array([width, height])
+    return numpy.append((centre - (size / 2)), size)
 
 
 if __name__ == '__main__':
@@ -105,9 +133,9 @@ if __name__ == '__main__':
                 images_with_faces.append(img)
                 all_faces.append(faces[0])
 
-        target_width = 640
-        final = numpy.zeros((target_width, target_width, 3), images[0].dtype)
-        width = calc_best_face_width_for_all(numpy.array(all_faces))
+        final = numpy.zeros((_TARGET_WIDTH, _TARGET_WIDTH, 3), images[0].dtype)
+        # width = calc_best_face_width_for_all(numpy.array(all_faces))
+        width = _TARGET_WIDTH / 3
 
         for i in xrange(len(images_with_faces)):
             image = images_with_faces[i]
