@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 
 # noinspection PyUnresolvedReferences,PyPackageRequirements
+import argparse
 import os
 
 import cv2
 import numpy
 from PIL import Image
-
-_TARGET_WIDTH = 640
 
 
 def iter_images_in(folder_path):
@@ -79,7 +78,7 @@ def calc_best_face_width_for_all(faces):
     return numpy.average(faces[:, 2])
 
 
-def transformed_face(image, face, face_centre, target_face_width, frame_size):
+def transformed_face(image, face, face_centre, face_width, frame_size):
     """
     Draw an image into the buffer after applying the needed
     transformations so that its face fills the final face rect.
@@ -87,18 +86,18 @@ def transformed_face(image, face, face_centre, target_face_width, frame_size):
     :param image: Image to draw.
     :param face: Valid face rectangle of that image.
     :param face_centre: Centre point of the transformed face.
-    :param target_face_width: The face width `face` should have
+    :param face_width: The face width `face` should have
         after drawing to buffer.
     :param frame_size: Size of the final frame.
     """
-    _, _, face_width, _ = face
-    size_ratio = target_face_width / float(face_width)
+    __, __, face_width, __ = face
+    size_ratio = face_width / float(face_width)
 
     image = cv2.resize(image, None, fx=size_ratio, fy=size_ratio,
                        interpolation=cv2.INTER_CUBIC)
 
-    x, y, _, h = numpy.array(face) * size_ratio
-    final_x, final_y, _, _ = calc_rectangle_for(face_centre, target_face_width, h)
+    x, y, __, h = numpy.array(face) * size_ratio
+    final_x, final_y, __, __ = calc_rectangle_for(face_centre, face_width, h)
     x, y = final_x - x, final_y - y
 
     translation = numpy.float32([[1, 0, x], [0, 1, y]])
@@ -139,20 +138,48 @@ def save_animation(images, filename):
 
 
 if __name__ == '__main__':
-    def main():
-        images = iter_images_in('photos/')
+    def parse_args():
+        description = 'Create gif animations of people with their faces centred'
+        parser = argparse.ArgumentParser(description=description)
+        parser.add_argument('--frame-size', nargs=2, type=int,
+                            help='Output image size (width height) in pixels.',
+                            default=[640, 640])
+        parser.add_argument('--dir', nargs=1, type=unicode,
+                            help='Directory where to load the images from.',
+                            default='photos/')
+        parser.add_argument('--face-width', nargs=1, type=float,
+                            help='Face width in the output file as a %% of '
+                                 '--frame-size.',
+                            default=0.25)
+        parser.add_argument('--centre', nargs=2, type=float,
+                            help='Face centre position in the output file as '
+                                 'a %% of the --frame-size',
+                            default=[0.5, 0.5])
+
+        args = parser.parse_args()
+
+        directory = args.dir
+        frame_size = tuple(args.frame_size)
+        width = frame_size[0]
+        face_width = width * args.face_width
+        centre = numpy.array((width * args.centre[0], width * args.centre[1]))
+
+        return directory, face_width, centre, frame_size
+
+
+    def main(directory, target_face_width, centre, frame_size):
+        images = iter_images_in(directory)
         images_with_faces = ((image, get_faces_in(image)) for image in images)
         images_with_faces = ((image, faces[0])
                              for image, faces in images_with_faces
                              if len(faces) > 0)
 
-        width = _TARGET_WIDTH / 6
-        centre = numpy.array((_TARGET_WIDTH / 2, _TARGET_WIDTH / 5))
-        frame_size = (_TARGET_WIDTH, _TARGET_WIDTH)
+        width = target_face_width
         transformed = (transformed_face(image, face, centre, width, frame_size)
                        for image, face in images_with_faces)
 
         saved_count = save_animation(transformed, 'output.gif')
-        print 'Saved {} images'.format(saved_count)
+        print 'Saved {} images from "{}"'.format(saved_count, directory)
 
-    main()
+
+    main(*parse_args())

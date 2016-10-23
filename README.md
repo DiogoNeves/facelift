@@ -67,3 +67,6 @@ Add your photos to the `photos/` folder in the same directory as the tool.
 ```bash
 > python facelift.py
 ```
+
+This uses all the default values. For more information on options available
+run `python facelift.py --help`.
