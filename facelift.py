@@ -129,8 +129,9 @@ def save_animation(images, filename):
 
     images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
               for image in images)
-    image_figures = ((axis.imshow(image), axis.set_title(''))
-                     for image in images)
+    # TODO: Make it render from an iterator
+    image_figures = [(axis.imshow(image), axis.set_title(''))
+                     for image in images]
     image_animation = animation.ArtistAnimation(figure, image_figures,
                                                 interval=200, repeat_delay=0,
                                                 blit=False)
@@ -141,7 +142,7 @@ def save_animation(images, filename):
 
 if __name__ == '__main__':
     def main():
-        images = list(iter_images_in('photos/'))
+        images = iter_images_in('photos/')
         images_with_faces = ((image, get_faces_in(image)) for image in images)
         images_with_faces = ((image, faces[0])
                              for image, faces in images_with_faces
