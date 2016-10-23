@@ -123,12 +123,13 @@ def calc_rectangle_for(centre, width, height):
 
 def save_animation(images, filename):
     images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB) for image in images)
-    images = (Image.fromarray(image) for image in images)
-    # TODO: What if no images??
-    frame = next(images)
-    with open(filename, 'wb') as output:
-        frame.save(output, save_all=True, append_images=list(images),
-                   duration=450)
+    images = [Image.fromarray(image) for image in images]
+    if len(images) > 1:
+        frame = images[0]
+        with open(filename, 'wb') as out:
+            frame.save(out, save_all=True, append_images=images[1:],
+                       duration=450)
+    return len(images)
 
 
 if __name__ == '__main__':
@@ -145,6 +146,7 @@ if __name__ == '__main__':
         transformed = (transformed_face(image, face, centre, width, frame_size)
                        for image, face in images_with_faces)
 
-        save_animation(transformed, 'output.gif')
+        saved_count = save_animation(transformed, 'output.gif')
+        print 'Saved {} images'.format(saved_count)
 
     main()
