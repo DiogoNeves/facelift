@@ -122,6 +122,12 @@ def calc_rectangle_for(centre, width, height):
 
 
 def save_animation(images, filename):
+    """
+    Create and save animation using images provided.
+    :param images: Images to animate.
+    :param filename: Filename of the output file.
+    :return: Number of images saved.
+    """
     images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB) for image in images)
     images = [Image.fromarray(image) for image in images]
     if len(images) > 1:
