@@ -6,7 +6,8 @@ import os
 
 import cv2
 import numpy
-
+from matplotlib import animation
+from matplotlib import pyplot
 
 _TARGET_WIDTH = 640
 
@@ -79,16 +80,17 @@ def calc_best_face_width_for_all(faces):
     return numpy.average(faces[:, 2])
 
 
-def draw_image_with_face(image, face, frame, target_face_width):
+def transformed_face(image, face, face_centre, target_face_width, frame_size):
     """
     Draw an image into the buffer after applying the needed
     transformations so that its face fills the final face rect.
     This changes buffer's contents.
     :param image: Image to draw.
     :param face: Valid face rectangle of that image.
-    :param frame: Frame Buffer where to draw the image into.
+    :param face_centre: Centre point of the transformed face.
     :param target_face_width: The face width `face` should have
         after drawing to buffer.
+    :param frame_size: Size of the final frame.
     """
     _, _, face_width, _ = face
     size_ratio = target_face_width / float(face_width)
@@ -97,14 +99,13 @@ def draw_image_with_face(image, face, frame, target_face_width):
                        interpolation=cv2.INTER_CUBIC)
 
     x, y, _, h = numpy.array(face) * size_ratio
-    centre = numpy.array(frame.shape[:2]) / 2
-    final_x, final_y, _, _ = calc_rectangle_for(centre, target_face_width, h)
+    final_x, final_y, _, _ = calc_rectangle_for(face_centre, target_face_width, h)
     x, y = final_x - x, final_y - y
 
     translation = numpy.float32([[1, 0, x], [0, 1, y]])
-    image = cv2.warpAffine(image, translation, frame.shape[:2])
+    image = cv2.warpAffine(image, translation, frame_size)
 
-    frame[:, :] = image[:, :]
+    return image
 
 
 def calc_rectangle_for(centre, width, height):
@@ -121,6 +122,23 @@ def calc_rectangle_for(centre, width, height):
     return numpy.append((centre - (size / 2)), size)
 
 
+def save_animation(images, filename):
+    figure = pyplot.figure()
+    axis = figure.add_subplot(111)
+    axis.set_axis_off()
+
+    images = [cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+              for image in images]
+    image_figures = [(axis.imshow(image), axis.set_title(''))
+                     for image in images]
+    image_animation = animation.ArtistAnimation(figure, image_figures,
+                                                interval=800, repeat_delay=0,
+                                                blit=False)
+
+    image_animation.save(filename, writer='imagemagick')
+    pyplot.show()
+
+
 if __name__ == '__main__':
     def main():
         images = list(iter_images_in('photos/'))
@@ -133,18 +151,14 @@ if __name__ == '__main__':
                 images_with_faces.append(img)
                 all_faces.append(faces[0])
 
-        final = numpy.zeros((_TARGET_WIDTH, _TARGET_WIDTH, 3), images[0].dtype)
         # width = calc_best_face_width_for_all(numpy.array(all_faces))
         width = _TARGET_WIDTH / 3
 
-        for i in xrange(len(images_with_faces)):
-            image = images_with_faces[i]
-            x, y, w, h = face = all_faces[i]
-            draw_image_with_face(image, face, final, width)
-            cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 5)
-            cv2.imshow('img%d' % i, final)
+        centre = numpy.array((_TARGET_WIDTH / 2, _TARGET_WIDTH / 2))
+        frame_size = (_TARGET_WIDTH, _TARGET_WIDTH)
+        transformed = [transformed_face(image, face, centre, width, frame_size)
+                       for image, face in zip(images_with_faces, all_faces)]
 
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        save_animation(transformed, 'output.gif')
 
     main()
