@@ -123,7 +123,7 @@ def calc_rectangle_for(centre, width, height):
 
 if __name__ == '__main__':
     def main():
-        images = list(iter_images_in('test_resources/test_photos/'))
+        images = list(iter_images_in('photos/'))
 
         images_with_faces = []
         all_faces = []
