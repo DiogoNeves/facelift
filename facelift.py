@@ -127,12 +127,12 @@ def save_animation(images, filename):
     axis = figure.add_subplot(111)
     axis.set_axis_off()
 
-    images = [cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-              for image in images]
-    image_figures = [(axis.imshow(image), axis.set_title(''))
-                     for image in images]
+    images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+              for image in images)
+    image_figures = ((axis.imshow(image), axis.set_title(''))
+                     for image in images)
     image_animation = animation.ArtistAnimation(figure, image_figures,
-                                                interval=800, repeat_delay=0,
+                                                interval=200, repeat_delay=0,
                                                 blit=False)
 
     image_animation.save(filename, writer='imagemagick')
@@ -142,22 +142,16 @@ def save_animation(images, filename):
 if __name__ == '__main__':
     def main():
         images = list(iter_images_in('photos/'))
+        images_with_faces = ((image, get_faces_in(image)) for image in images)
+        images_with_faces = ((image, faces[0])
+                             for image, faces in images_with_faces
+                             if len(faces) > 0)
 
-        images_with_faces = []
-        all_faces = []
-        for img in images:
-            faces = get_faces_in(img)
-            if len(faces) > 0:
-                images_with_faces.append(img)
-                all_faces.append(faces[0])
-
-        # width = calc_best_face_width_for_all(numpy.array(all_faces))
-        width = _TARGET_WIDTH / 3
-
-        centre = numpy.array((_TARGET_WIDTH / 2, _TARGET_WIDTH / 2))
+        width = _TARGET_WIDTH / 6
+        centre = numpy.array((_TARGET_WIDTH / 2, _TARGET_WIDTH / 5))
         frame_size = (_TARGET_WIDTH, _TARGET_WIDTH)
-        transformed = [transformed_face(image, face, centre, width, frame_size)
-                       for image, face in zip(images_with_faces, all_faces)]
+        transformed = (transformed_face(image, face, centre, width, frame_size)
+                       for image, face in images_with_faces)
 
         save_animation(transformed, 'output.gif')
 
