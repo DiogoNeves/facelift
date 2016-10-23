@@ -22,8 +22,8 @@ def iter_images_in(folder_path):
         if folder_path[-1] != '/':
             folder_path += '/'
         files = os.listdir(folder_path)
-        image_paths = [f for f in files
-                       if f.endswith('.png') or f.endswith('.jpg')]
+        image_paths = (f for f in files
+                       if f.lower()[-4:] in ['.png', '.jpg'])
         images = (load_image(folder_path + path) for path in image_paths)
         return (image for image in images if image is not None)
     except OSError as e:
@@ -133,7 +133,7 @@ def save_animation(images, filename):
     image_figures = [(axis.imshow(image), axis.set_title(''))
                      for image in images]
     image_animation = animation.ArtistAnimation(figure, image_figures,
-                                                interval=200, repeat_delay=0,
+                                                interval=450, repeat_delay=0,
                                                 blit=False)
 
     image_animation.save(filename, writer='imagemagick')
