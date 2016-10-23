@@ -6,8 +6,7 @@ import os
 
 import cv2
 import numpy
-from matplotlib import animation
-from matplotlib import pyplot
+from PIL import Image
 
 _TARGET_WIDTH = 640
 
@@ -123,21 +122,14 @@ def calc_rectangle_for(centre, width, height):
 
 
 def save_animation(images, filename):
-    figure = pyplot.figure()
-    axis = figure.add_subplot(111)
-    axis.set_axis_off()
-
-    images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-              for image in images)
-    # TODO: Make it render from an iterator
-    image_figures = [(axis.imshow(image), axis.set_title(''))
-                     for image in images]
-    image_animation = animation.ArtistAnimation(figure, image_figures,
-                                                interval=450, repeat_delay=0,
-                                                blit=False)
-
-    image_animation.save(filename, writer='imagemagick')
-    pyplot.show()
+    images = (cv2.cvtColor(image, cv2.COLOR_BGR2RGB) for image in images)
+    images = [Image.fromarray(image) for image in images]
+    if len(images) > 1:
+        frame = images[0]
+        with open(filename, 'wb') as out:
+            frame.save(out, save_all=True, append_images=images[1:],
+                       duration=450)
+    return len(images)
 
 
 if __name__ == '__main__':
@@ -154,6 +146,7 @@ if __name__ == '__main__':
         transformed = (transformed_face(image, face, centre, width, frame_size)
                        for image, face in images_with_faces)
 
-        save_animation(transformed, 'output.gif')
+        saved_count = save_animation(transformed, 'output.gif')
+        print 'Saved {} images'.format(saved_count)
 
     main()
