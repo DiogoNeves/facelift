@@ -78,7 +78,7 @@ def calc_best_face_width_for_all(faces):
     return numpy.average(faces[:, 2])
 
 
-def transformed_face(image, face, face_centre, face_width, frame_size):
+def transformed_face(image, face, face_centre, target_face_width, frame_size):
     """
     Draw an image into the buffer after applying the needed
     transformations so that its face fills the final face rect.
@@ -86,12 +86,12 @@ def transformed_face(image, face, face_centre, face_width, frame_size):
     :param image: Image to draw.
     :param face: Valid face rectangle of that image.
     :param face_centre: Centre point of the transformed face.
-    :param face_width: The face width `face` should have
+    :param target_face_width: The face width `face` should have
         after drawing to buffer.
     :param frame_size: Size of the final frame.
     """
     __, __, face_width, __ = face
-    size_ratio = face_width / float(face_width)
+    size_ratio = face_width / float(target_face_width)
 
     image = cv2.resize(image, None, fx=size_ratio, fy=size_ratio,
                        interpolation=cv2.INTER_CUBIC)
@@ -158,10 +158,10 @@ if __name__ == '__main__':
 
         args = parser.parse_args()
 
-        directory = args.dir
+        directory = args.dir[0]
         frame_size = tuple(args.frame_size)
         width = frame_size[0]
-        face_width = width * args.face_width
+        face_width = width * args.face_width[0]
         centre = numpy.array((width * args.centre[0], width * args.centre[1]))
 
         return directory, face_width, centre, frame_size
