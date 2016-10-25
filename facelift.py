@@ -58,7 +58,10 @@ def get_faces_in(image):
         return numpy.empty((0, 4))
 
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    gray = cv2.equalizeHist(gray)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1,
+                                          minNeighbors=4, minSize=(30, 30),
+                                          flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
     if isinstance(faces, tuple):
         return numpy.empty((0, 4))
     else:
@@ -146,11 +149,11 @@ if __name__ == '__main__':
                             default=[640, 640])
         parser.add_argument('--dir', nargs=1, type=unicode,
                             help='Directory where to load the images from.',
-                            default='photos/')
+                            default=['photos/'])
         parser.add_argument('--face-width', nargs=1, type=float,
                             help='Face width in the output file as a %% of '
                                  '--frame-size.',
-                            default=0.25)
+                            default=[0.25])
         parser.add_argument('--centre', nargs=2, type=float,
                             help='Face centre position in the output file as '
                                  'a %% of the --frame-size',
