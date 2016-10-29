@@ -49,9 +49,9 @@ def load_image(image_path):
 def resize_image(image, frame_size):
     x, y, __ = image.shape
     if abs(x - frame_size[0]) >= abs(y - frame_size[1]):
-        ratio = (frame_size[0] * 2) / float(x)
+        ratio = frame_size[0] / float(x)
     else:
-        ratio = (frame_size[1] * 2) / float(y)
+        ratio = frame_size[1] / float(y)
     return cv2.resize(image, None, fx=ratio, fy=ratio,
                       interpolation=cv2.INTER_CUBIC)
 
@@ -187,7 +187,8 @@ if __name__ == '__main__':
 
 
     def main(directory, target_face_width, centre, frame_size, output_filename):
-        images = iter_images_in(directory, frame_size)
+        double_size = (frame_size[0] * 2, frame_size[1] * 2)
+        images = iter_images_in(directory, double_size)
         images_with_faces = ((image, get_faces_in(image)) for image in images)
         images_with_faces = ((image, faces[0])
                              for image, faces in images_with_faces

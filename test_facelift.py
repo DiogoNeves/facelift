@@ -38,7 +38,7 @@ def test_it_doesnt_detect_face_where_it_doesnt_exist():
 
 
 def test_loading_folder_returns_iterator():
-    image_folder = iter_images_in(TEST_PHOTO_FOLDER)
+    image_folder = iter_images_in(TEST_PHOTO_FOLDER, (100, 100))
     assert image_folder
 
 
@@ -48,10 +48,14 @@ def test_loading_folder_returns_all_images():
         'test_photo2.jpg',
         'test_photo3.png',
     ]
-    image_folder = list(iter_images_in(TEST_PHOTO_FOLDER))
+    image_folder = list(iter_images_in(TEST_PHOTO_FOLDER, (100, 100)))
     assert len(image_folder) == len(real_images)
-    assert all([(img == load_image(TEST_PHOTO_FOLDER + path)).all()
-                for img, path in zip(image_folder, real_images)])
+
+
+def test_loading_folder_resize_images():
+    size = (10, 10)
+    image_folder = list(iter_images_in(TEST_PHOTO_FOLDER, size))
+    assert all([image.shape[:2] <= size for image in image_folder])
 
 
 def test_loading_folder_appends_slash_to_path():
@@ -61,16 +65,16 @@ def test_loading_folder_appends_slash_to_path():
         'test_photo3.png',
     ]
     path = TEST_FOLDER + 'test_photos'
-    image_folder = list(iter_images_in(path))
+    image_folder = list(iter_images_in(path, (100, 100)))
     assert len(image_folder) == len(real_images)
 
 
 def test_loading_invalid_folder_returns_none():
-    assert iter_images_in('invalid folder') is None
+    assert iter_images_in('invalid folder', (100, 100)) is None
 
 
 def test_loading_folder_with_empty_path_returns_none():
-    assert iter_images_in('') is None
+    assert iter_images_in('', (100, 100)) is None
 
 
 def test_calc_best_face_width_for_all_single_face_returns_its_width():
