@@ -10,10 +10,11 @@ import numpy
 from PIL import Image
 
 
-def iter_images_in(folder_path):
+def iter_images_in(folder_path, frame_size):
     """
     Return an iterator to all images in the folder (.png and .jpg).
     :param folder_path: Folder where to load the images from.
+    :param frame_size: Target frame size for all images.
     :return: Generator/Iterator of loaded images.
     """
     try:
@@ -23,7 +24,8 @@ def iter_images_in(folder_path):
         image_paths = (f for f in files
                        if f.lower()[-4:] in ['.png', '.jpg'])
         images = (load_image(folder_path + path) for path in image_paths)
-        return (image for image in images if image is not None)
+        return (resize_image(image, frame_size)
+                for image in images if image is not None)
     except OSError as e:
         if e.errno == 2:
             return None
@@ -44,6 +46,16 @@ def load_image(image_path):
     return cv2.imread(image_path)
 
 
+def resize_image(image, frame_size):
+    x, y, __ = image.shape
+    if abs(x - frame_size[0]) >= abs(y - frame_size[1]):
+        ratio = (frame_size[0] * 2) / float(x)
+    else:
+        ratio = (frame_size[1] * 2) / float(y)
+    return cv2.resize(image, None, fx=ratio, fy=ratio,
+                      interpolation=cv2.INTER_CUBIC)
+
+
 def get_faces_in(image):
     """
     Detect all faces in the image.
@@ -60,7 +72,7 @@ def get_faces_in(image):
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     gray = cv2.equalizeHist(gray)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1,
-                                          minNeighbors=4, minSize=(30, 30),
+                                          minNeighbors=4, minSize=(24, 24),
                                           flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
     if isinstance(faces, tuple):
         return numpy.empty((0, 4))
@@ -94,7 +106,7 @@ def transformed_face(image, face, face_centre, target_face_width, frame_size):
     :param frame_size: Size of the final frame.
     """
     __, __, face_width, __ = face
-    size_ratio = face_width / float(target_face_width)
+    size_ratio = target_face_width / float(face_width)
 
     image = cv2.resize(image, None, fx=size_ratio, fy=size_ratio,
                        interpolation=cv2.INTER_CUBIC)
@@ -171,7 +183,7 @@ if __name__ == '__main__':
 
 
     def main(directory, target_face_width, centre, frame_size):
-        images = iter_images_in(directory)
+        images = iter_images_in(directory, frame_size)
         images_with_faces = ((image, get_faces_in(image)) for image in images)
         images_with_faces = ((image, faces[0])
                              for image, faces in images_with_faces
