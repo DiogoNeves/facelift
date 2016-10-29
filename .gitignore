@@ -93,4 +93,4 @@ ENV/
 
 # Facelift
 photos/*
-output.gif
+*.gif
