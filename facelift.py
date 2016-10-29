@@ -71,7 +71,7 @@ def get_faces_in(image):
 
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     gray = cv2.equalizeHist(gray)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1,
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3,
                                           minNeighbors=4, minSize=(24, 24),
                                           flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
     if isinstance(faces, tuple):
