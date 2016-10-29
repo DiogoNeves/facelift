@@ -170,6 +170,9 @@ if __name__ == '__main__':
                             help='Face centre position in the output file as '
                                  'a %% of the --frame-size',
                             default=[0.5, 0.5])
+        parser.add_argument('--output', nargs=1, type=unicode,
+                            help='Output file name (excluding .gif).',
+                            default='output')
 
         args = parser.parse_args()
 
@@ -178,11 +181,12 @@ if __name__ == '__main__':
         width = frame_size[0]
         face_width = width * args.face_width[0]
         centre = numpy.array((width * args.centre[0], width * args.centre[1]))
+        output_filename = args.output[0]
 
-        return directory, face_width, centre, frame_size
+        return directory, face_width, centre, frame_size, output_filename
 
 
-    def main(directory, target_face_width, centre, frame_size):
+    def main(directory, target_face_width, centre, frame_size, output_filename):
         images = iter_images_in(directory, frame_size)
         images_with_faces = ((image, get_faces_in(image)) for image in images)
         images_with_faces = ((image, faces[0])
@@ -193,7 +197,9 @@ if __name__ == '__main__':
         transformed = (transformed_face(image, face, centre, width, frame_size)
                        for image, face in images_with_faces)
 
-        saved_count = save_animation(transformed, 'output.gif')
+        saved_count = save_animation(transformed,
+                                     '{}.gif'.format(output_filename))
+
         print 'Saved {} images from "{}"'.format(saved_count, directory)
 
 
