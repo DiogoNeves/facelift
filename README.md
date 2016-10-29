@@ -27,6 +27,9 @@ Create a tool that given a list of photos of the same person, aligns their faces
 
 Depending on how much fun I have with this, I will add support for selecting (automatically or manually) the right face in photos of multiple people.
 
+* Detecting baby faces and different alignments isn't perfect
+* Need to create a demo result image from public faces... suggestions?
+
 ## Run the Tool
 
 Keep in mind this is very experimental, I didn't spend much time thinking about distribution.
